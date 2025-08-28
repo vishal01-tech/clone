@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <form action="/register" method="post">
+        <div class="main">
+        <h2 style="margin-bottom: 10px;">Registration</h2>
+        <h3>Full Name <input type="text" name="fullname" placeholder="Enter your fullname" required></h3><br>
+        <h3>User Name <input type="text" name="username" placeholder="Enter your username" required></h3><br>
+        <h3>Password <input type="password" name="password" placeholder="Enter your password" required></h3><br>
+        <h3>Re-confirm Password<input type="password" name="reconfirm_password" placeholder="Re-enter your password" required></h3><br>
+        <button type ="submit" class="btn" style="color: white; margin-bottom: 30px;" >Register</button>
+    </div>
+    </form>
+</body>
+</html>
