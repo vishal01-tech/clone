@@ -1,99 +1,139 @@
+
 * {
-  margin: o;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-image: url(image.png);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  margin: 0;
-  color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url(image.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    color: white;
 }
 
+/* main container */
 .main {
-  background-color: rgba(124, 237, 237, 0.2);
-  border-radius: 15px;
-  height: 550px;
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
+    background-color: rgba(124, 237, 237, 0.2);
+    border-radius: 15px;
+    min-height: 450px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 20px;
 }
-.main h3,
-.main h5 {
-  margin-left: 20px;
-  width: 60%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
+
+/* svg icon */
 .main svg {
-  height: 100px;
-}
-.main input {
-  width: 80%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 2px solid rgba(124, 237, 237, 0.2);
-  outline: none;
-  margin-top: 3px;
-  font-size: 1rem;
-  /* margin-left: 20px; */
-}
-.main button {
-  margin-top: 10px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
-  background: rgba(124, 237, 237, 0.2);
-  color: #000;
-  transition: 0.3s;
-  btn {
-    color: rgba(0, 255, 255, 0.152);
-  }
+    height: 100px;
+    margin-bottom: 20px;
 }
 
-.main button:hover {
-  background: rgb(3, 141, 141);
+/* Form group  */
+.form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    margin: 10px 0;
+    margin-right: 50px;
 }
-.word span {
-  font-size: 2rem;
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-right: 10px;
+    flex: 1;
+    color: white;
+    min-width: 150px;   
+    text-align: right;  
 }
+
+.form-group input {
+    flex: 2;
+    padding: 8px;
+    border-radius: 10px;
+    border: 2px solid rgba(124, 237, 237, 0.5);
+    outline: none;
+    font-size: 1rem;
+}
+
+/* required field */
+.required {
+    color: red;
+    font-weight: bold;
+}
+
+/* buttons */
+.main button,
+.back-btn {
+    width: 80%;
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(124, 237, 237, 0.2);
+    color: #000;
+    transition: 0.3s;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+}
+
+.main button:hover,
+.back-btn:hover {
+    background: rgb(3, 141, 141);
+    color: white;
+}
+
+/*  Add gap between Register and Back buttons */
+.back-btn {
+    margin-top: 25px;
+}
+
+
 .letter {
-  transform: translateY(-100px);
-  opacity: 0;
-  font-size: 1rem;
-  margin-left: 50px;
-  animation: drop 0.8s ease-out forwards;
-}
-@keyframes drop {
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+    transform: translateY(-100px);
+    opacity: 0;
+    font-size: 1rem;
+    margin-left: 50px;
+    animation: drop 0.8s ease-out forwards;
 }
 
-.letter:nth-child(1) {
-  animation-delay: 0s;
+@keyframes drop {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
-.letter:nth-child(2) {
-  animation-delay: 0.2s;
+
+.letter:nth-child(1) { animation-delay: 0s; }
+.letter:nth-child(2) { animation-delay: 0.2s; }
+.letter:nth-child(3) { animation-delay: 0.4s; }
+.letter:nth-child(4) { animation-delay: 0.6s; }
+.letter:nth-child(5) { animation-delay: 0.8s; }
+
+/* Text & links */
+p {
+    margin-top: 15px;
 }
-.letter:nth-child(3) {
-  animation-delay: 0.4s;
+
+.signup-link {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
 }
-.letter:nth-child(4) {
-  animation-delay: 0.6s;
-}
-.letter:nth-child(5) {
-  animation-delay: 0.8s;
+
+.signup-link:hover {
+    color: cyan;
 }
