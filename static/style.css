@@ -137,3 +137,7 @@ p {
 .signup-link:hover {
     color: cyan;
 }
+.forgot{
+    text-decoration: none;
+    margin-top: 50px;
+}
