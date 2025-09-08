@@ -42,6 +42,14 @@
             color: red;
             font-weight: bold;
         }
+        form{
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        
     </style>
 </head>
 
@@ -50,15 +58,16 @@
         <h1>Account Check</h1>
 
         {% if admin %}
-        <p>Your username is: <strong>{{ username }}</strong></p>
-        <form method="post" action="/update_password">
-            <input type="hidden" name="identifier" value="{{ identifier }}">
-            <a href="/new">Click here to set new password</a>
-        </form>
+            <p>Your username is: <strong>{{ username }}</strong></p>
+            <form action="/new" method="get">
+                <input type="hidden" name="token" value="{{ token }}">
+                <button class="buttons" type="submit">Reset Password</button>
+            </form>
         {% else %}
-        <p class="error">No user found</p>
-        <a href="/forgot">Try Again</a>
+            <p class="error">No user found</p>
+            <a href="/forgot">Try Again</a>
         {% endif %}
+
     </div>
 </body>
 
