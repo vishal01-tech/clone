@@ -53,13 +53,7 @@ class CRUD:
     # ------------------- Admin Methods -------------------
 
     def register_admin(self, fullname: str, username: str, hashed_password: str, email: str, phone: str):
-        new_admin = self.Admin(
-            fullname=fullname,
-            username=username,
-            password=hashed_password,
-            email=email,
-            phone=phone
-        )
+        new_admin = self.Admin(fullname=fullname,username=username,password=hashed_password,email=email,phone=phone)
         self.session.add(new_admin)
         self.session.commit()
         return new_admin
@@ -68,9 +62,7 @@ class CRUD:
         return self.session.query(self.Admin).filter_by(username=username).first()
 
     def get_admin_by_email_or_phone(self, identifier: str):
-        return self.session.query(self.Admin).filter(
-            (self.Admin.email == identifier) | (self.Admin.phone == identifier)
-        ).first()
+        return self.session.query(self.Admin).filter((self.Admin.email == identifier) | (self.Admin.phone == identifier)).first()
 
     def update_admin_password(self, admin_id: int, new_hashed_password: str):
         admin = self.session.query(self.Admin).filter_by(id=admin_id).first()
@@ -88,9 +80,7 @@ class CRUD:
         if admin:
             return ("admin", admin)
 
-        user = self.session.query(self.User).filter(
-            (self.User.address == identifier) | (self.User.name == identifier)
-        ).first()
+        user = self.session.query(self.User).filter((self.User.address == identifier) | (self.User.name == identifier)).first()
         if user:
             return ("user", user)
 

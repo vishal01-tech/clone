@@ -17,13 +17,13 @@
             <!-- Full Name -->
             <div class="form-group">
                 <label for="fullname">Full Name <span class="required">*</span></label>
-                <input type="text" id="fullname" name="fullname" placeholder="Enter your fullname" required>
+                <input type="text" id="fullname" name="fullname" placeholder="Enter your fullname" required pattern="^[A-Za-z\s]+$" title="Please enter a valid name it can not start with number or special characters">
             </div>
 
             <!-- Username -->
             <div class="form-group">
                 <label for="username">User Name <span class="required">*</span></label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required pattern="^[A-Za-z0-9]{3,16}$" title="Please enter a valid username">
             </div>
 
             <!-- Email -->
@@ -35,7 +35,7 @@
             <!-- phone -->
              <div class="form-group">
                 <label for="phone">Phone <span class="required">*</span></label>
-                <input type="tel" name="phone" id="phone" placeholder="Enter your number" required>
+                <input type="tel" name="phone" id="phone" placeholder="Enter your number" required pattern="^[0-9]{10}+$" title="Phone number should be of 10 digits">
              </div>
 
             <!-- Password -->

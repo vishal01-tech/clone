@@ -12,9 +12,6 @@ import smtplib
 from email.mime.text import MIMEText
 
 
-
-
-
 # jwt config
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
@@ -34,21 +31,21 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 
-# send email function
+# ---------send email---------------
 def send_email(to_email: str, subject: str, body: str):
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
+    smtp_server = "smtp.gmail.com" #address of smtp server
+    smtp_port = 587 # port 587 is used for sending email
     smtp_username = "shivardhana@gmail.com"  # replace with your Gmail
     smtp_password = "qobi zkop bxii onfg "     # use Gmail App Password
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = smtp_username
-    msg["To"] = to_email
+    msg = MIMEText(body)  #Multipurpose Internet Mail Extensions object for the email body.The email content is passed into it.
+    msg["Subject"] = subject  #Sets the subject of the email.
+    msg["From"] = smtp_username  #specify the sender email account
+    msg["To"] = to_email # specify the recipient email account
 
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_username, smtp_password)
+    with smtplib.SMTP(smtp_server, smtp_port) as server: #establish a connection to smtp server with port
+        server.starttls() # it ensure the data send is encrypt
+        server.login(smtp_username, smtp_password) #log in to gmail server
         server.sendmail(smtp_username, [to_email], msg.as_string())
 
 
@@ -103,14 +100,8 @@ async def register_page(request: Request):
 
 
 @app.post("/register")
-async def register_admin(
-    request: Request,
-    fullname: str = Form(...),
-    username: str = Form(...),
-    password: str = Form(...),
-    email: str = Form(...),
-    phone: str = Form(...)
-):
+async def register_admin(request: Request,fullname: str = Form(...),username: str = Form(...),password: str = Form(...),email: str = Form(...),
+    phone: str = Form(...)):
     existing = crud.get_admin_by_username(username)
     if existing:
         return templates.TemplateResponse("register.html", {"request": request, "error": "Username already exists"})
@@ -133,13 +124,7 @@ async def login_admin(request: Request, username: str = Form(...), password: str
     access_token = create_access_token(token_data)
 
     response = RedirectResponse(url="/home", status_code=303)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        path="/",          
-        secure=False      
-    )
+    response.set_cookie(key="access_token",value=access_token,httponly=True,path="/",          secure=False      )
     return response
 
 
@@ -158,40 +143,13 @@ async def forgot_password_page(request: Request):
     return templates.TemplateResponse("forgot_pass.html", {"request": request})
 
 
-# post
-# @app.post("/show", response_class=HTMLResponse)
-# async def forgot_password(request: Request, identifier: str = Form(...)):
-#     identifier = identifier.strip()
-#     role, account = crud.get_account_by_email_or_phone(identifier)
-
-#     if not account:
-#         return templates.TemplateResponse("forgot_pass.html", {
-#             "request": request,
-#             "error": "No account found with this email or phone"
-#         })
-
-#     reset_token = create_access_token({"sub": account.username}, expires_delta=timedelta(minutes=1))
-#     return templates.TemplateResponse("show_username.html", {
-#         "request": request,
-#         "username": account.username,
-#         "identifier": identifier,
-#         "role": role,
-#         "admin": True,
-#         "token": reset_token
-#     })
-
-
-
 @app.post("/show", response_class=HTMLResponse)
 async def forgot_password(request: Request, identifier: str = Form(...)):
     identifier = identifier.strip()
     role, account = crud.get_account_by_email_or_phone(identifier)
 
     if not account:
-        return templates.TemplateResponse("forgot_pass.html", {
-            "request": request,
-            "error": "No account found with this email or phone"
-        })
+        return templates.TemplateResponse("forgot_pass.html", {"request": request,"error": "No account found with this email or phone"})
 
     # Generate and save OTP
     otp = generate_otp()
@@ -199,14 +157,7 @@ async def forgot_password(request: Request, identifier: str = Form(...)):
 
     # Send OTP via email
     send_email(account.email, "Password Reset OTP", f"Your OTP code is: {otp}")
-
-    return templates.TemplateResponse("otp_page.html", {
-        "request": request,
-        "username": account.username,
-        "identifier": identifier,
-        "role": role
-    })
-
+    return templates.TemplateResponse("otp_page.html", {"request": request,"username": account.username,"identifier": identifier,"role": role})
 
 
 # Reset Password
@@ -214,24 +165,17 @@ async def forgot_password(request: Request, identifier: str = Form(...)):
 def show_reset_get(request: Request, token: str):
     decoded = verify_access_token(token)
     if not decoded:
-        return templates.TemplateResponse(
-            "new_pass.html",
-            {"request": request, "error": "Invalid or expired token", "token": token}
-        )
+        return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Invalid or expired token", "token": token})
     
     username = decoded["sub"]
     admin = crud.get_admin_by_username(username)
-    return templates.TemplateResponse(
-        "new_pass.html",
-        {"request": request, "token": token, "error": None, "admin": admin, "username": username}
-    )
+    return templates.TemplateResponse("new_pass.html",{"request": request, "token": token, "error": None, "admin": admin, "username": username})
 
 
 # -----------Password update-------------
 @app.get("/update_password",response_class=HTMLResponse)
 async def update_get(request : Request):
     return templates.TemplateResponse("new_pass.html",{"request": request})
-
 
 
 #  -----------------update password ---------------
@@ -244,11 +188,7 @@ async def update_password(
 ):
     # check confirm password
     if new_password != confirm_password:
-        return templates.TemplateResponse("new.html", {
-            "request": request,
-            "token": token,
-            "error": "Passwords do not match"
-        })
+        return templates.TemplateResponse("new.html", {"request": request,"token": token,"error": "Passwords do not match"})
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -256,52 +196,18 @@ async def update_password(
         if username is None:
             raise HTTPException(status_code=400, detail="Invalid token")
     except JWTError:
-        return templates.TemplateResponse("new_pass.html", {
-            "request": request,
-            "error": "Invalid or expired reset token"
-        })
+        return templates.TemplateResponse("new_pass.html", {"request": request,"error": "Invalid or expired reset token"})
 
     admin = crud.get_admin_by_username(username)
     if not admin:
-        return templates.TemplateResponse("new_pass.html", {
-            "request": request,
-            "error": "Admin not found"
-        })
+        return templates.TemplateResponse("new_pass.html", {"request": request,"error": "Admin not found"})
 
     hashed_password = pwd_context.hash(new_password)
     crud.update_admin_password(admin.id, hashed_password)
 
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "msg": "Password updated successfully, please login again"
+    return templates.TemplateResponse("index.html", {"request": request,"msg": "Password updated successfully, please login again"
     })
 
-
-# @app.post("/update_password", response_class=HTMLResponse)
-# async def update_password(
-#     request: Request,
-#     token: str = Form(...),
-#     new_password: str = Form(...),
-#     confirm_password: str = Form(...)
-# ):
-#     if new_password != confirm_password:
-#         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Passwords do not match", "token": token})
-
-#     decoded = verify_access_token(token)
-#     if not decoded:
-#         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Invalid or expired token", "token": token})
-
-#     username = decoded["sub"]
-
-#     admin = crud.get_admin_by_username(username)
-
-#     if not admin:
-#         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "No user found", "token": token})
-    
-#     hashed = hash_password(new_password)
-#     crud.update_user_password(admin.id, hashed)
-
-#     return RedirectResponse(url="/", status_code=303)
 
 
 # ------------------- Show Username -------------------
@@ -316,12 +222,7 @@ async def show_username(request: Request):
 async def show_username_post(request: Request):
     current_user = get_current_user(request)
     if current_user:
-        return templates.TemplateResponse("show_username.html", {
-            "request": request,
-            "admin": True,
-            "username": current_user["sub"],
-            "identifier": "from_cookie"
-        })
+        return templates.TemplateResponse("show_username.html", {"request": request,"admin": True,"username": current_user["sub"],"identifier": "from_cookie"})
     return RedirectResponse(url="/", status_code=303)
 
 
@@ -351,9 +252,7 @@ async def update_user_form(request: Request, user_id: int, current_user: dict = 
 
     return templates.TemplateResponse("update_user.html", {"request": request, "user": user})
 
-
-
-
+# ----------update user-----------------
 @app.post("/update_user/{user_id}", response_class=HTMLResponse)
 async def update_user(
     request: Request,
@@ -370,9 +269,7 @@ async def update_user(
     crud.update_user(user_id, name, age, gender, address)
     return RedirectResponse(url="/home", status_code=303)
 
-
-
-
+# ---------------delete user-----------------
 @app.post("/delete_user/{user_id}", response_class=HTMLResponse)
 async def delete_user_post(request: Request, user_id: int, current_user: dict = Depends(get_current_user)):
     if not current_user:
@@ -382,14 +279,12 @@ async def delete_user_post(request: Request, user_id: int, current_user: dict = 
     return RedirectResponse(url="/home", status_code=303)
 
 
-
+# --------------add user------------
 @app.get("/add_user", response_class=HTMLResponse)
 async def add_user_form(request: Request, current_user: dict = Depends(get_current_user)):
     if not current_user:
         return RedirectResponse(url="/", status_code=303)
     return templates.TemplateResponse("add_user.html", {"request": request})
-
-
 
 @app.post("/add_user", response_class=HTMLResponse)
 async def add_user(
@@ -407,7 +302,7 @@ async def add_user(
     return RedirectResponse(url="/home", status_code=303)
 
 
-
+# ------------verify otp-----------------
 @app.post("/verify_otp", response_class=HTMLResponse)
 async def verify_otp(request: Request, username: str = Form(...), otp: str = Form(...)):
     admin = crud.get_admin_by_username(username)
