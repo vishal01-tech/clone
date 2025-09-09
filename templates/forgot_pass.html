@@ -78,7 +78,6 @@
             margin-top: 30px;
 
         }
-
     </style>
 </head>
 
@@ -89,7 +88,7 @@
         <p style="color:red;">{{ error }}</p>
         {% endif %}
         <form action="/show" method="post">
-            <label for="identifier">Enter Email or Phone:</label>
+            <label for="identifier">Enter registered Email:</label>
             <input type="text" name="identifier" id="identifier" required>
             <button type="submit" class="buttons">Next</button>
         </form>

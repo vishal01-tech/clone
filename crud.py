@@ -1,5 +1,6 @@
 from database import session
 from models import User, Admin
+from datetime import datetime , timedelta
 
 class CRUD:
     User = User
@@ -94,3 +95,25 @@ class CRUD:
             return ("user", user)
 
         return (None, None)
+
+
+    # Save OTP in Admin table
+    def save_admin_otp(self, admin_id: int, otp: str):
+        admin = self.session.query(self.Admin).filter_by(id=admin_id).first()
+        if admin:
+            admin.otp = otp
+            admin.otp_expiry = datetime.utcnow() + timedelta(minutes=5)  # OTP valid 5 mins
+            self.session.commit()
+            return admin
+        return None
+
+    # Verify OTP
+    def verify_admin_otp(self, admin_id: int, otp: str):
+        admin = self.session.query(self.Admin).filter_by(id=admin_id).first()
+        if admin and admin.otp == otp and admin.otp_expiry and admin.otp_expiry > datetime.utcnow():
+            # OTP valid, clear it after use
+            admin.otp = None
+            admin.otp_expiry = None
+            self.session.commit()
+            return True
+        return False

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <style>
+        * {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('static/image.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            color: white;
+        }
+
+        /* main container */
+        .main {
+            background-color: rgba(124, 237, 237, 0.2);
+            border-radius: 15px;
+            min-height: 300px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        /* Form group  */
+        .form-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 80%;
+            margin: 10px 0;
+        }
+
+        .form-group label {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-right: 10px;
+            flex: 1;
+            color: white;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .form-group input {
+            flex: 2;
+            padding: 8px;
+            border-radius: 10px;
+            border: 2px solid rgba(124, 237, 237, 0.5);
+            outline: none;
+            font-size: 1rem;
+        }
+
+        /* buttons */
+        .main button {
+            width: 80%;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(124, 237, 237, 0.2);
+            color: white;
+            transition: 0.3s;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .main button:hover {
+            background: rgb(3, 141, 141);
+            color: white;
+        }
+
+        /* error message */
+        .error {
+            color: red;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <h2>Enter OTP</h2>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="post" action="/verify_otp">
+            <input type="hidden" name="username" value="{{ username }}">
+            <div class="form-group">
+                <label>OTP:</label>
+                <input type="text" name="otp" required>
+            </div>
+            <button type="submit">Verify OTP</button>
+        </form>
+    </div>
+</body>
+
+</html>

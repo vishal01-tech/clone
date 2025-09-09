@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 from passlib.context import CryptContext
 import random
+import smtplib
+from email.mime.text import MIMEText
+
 
 
 
@@ -29,6 +32,25 @@ def verify_password(plain_password: str, hashed_password: str):
 # generate 6 digit number
 def generate_otp():
     return str(random.randint(100000, 999999))
+
+
+# send email function
+def send_email(to_email: str, subject: str, body: str):
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    smtp_username = "shivardhana@gmail.com"  # replace with your Gmail
+    smtp_password = "qobi zkop bxii onfg "     # use Gmail App Password
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = smtp_username
+    msg["To"] = to_email
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.sendmail(smtp_username, [to_email], msg.as_string())
+
 
 
 # initializing the fastapi
@@ -137,6 +159,29 @@ async def forgot_password_page(request: Request):
 
 
 # post
+# @app.post("/show", response_class=HTMLResponse)
+# async def forgot_password(request: Request, identifier: str = Form(...)):
+#     identifier = identifier.strip()
+#     role, account = crud.get_account_by_email_or_phone(identifier)
+
+#     if not account:
+#         return templates.TemplateResponse("forgot_pass.html", {
+#             "request": request,
+#             "error": "No account found with this email or phone"
+#         })
+
+#     reset_token = create_access_token({"sub": account.username}, expires_delta=timedelta(minutes=1))
+#     return templates.TemplateResponse("show_username.html", {
+#         "request": request,
+#         "username": account.username,
+#         "identifier": identifier,
+#         "role": role,
+#         "admin": True,
+#         "token": reset_token
+#     })
+
+
+
 @app.post("/show", response_class=HTMLResponse)
 async def forgot_password(request: Request, identifier: str = Form(...)):
     identifier = identifier.strip()
@@ -148,15 +193,20 @@ async def forgot_password(request: Request, identifier: str = Form(...)):
             "error": "No account found with this email or phone"
         })
 
-    reset_token = create_access_token({"sub": account.username}, expires_delta=timedelta(minutes=1))
-    return templates.TemplateResponse("show_username.html", {
+    # Generate and save OTP
+    otp = generate_otp()
+    crud.save_admin_otp(account.id, otp)
+
+    # Send OTP via email
+    send_email(account.email, "Password Reset OTP", f"Your OTP code is: {otp}")
+
+    return templates.TemplateResponse("otp_page.html", {
         "request": request,
         "username": account.username,
         "identifier": identifier,
-        "role": role,
-        "admin": True,
-        "token": reset_token
+        "role": role
     })
+
 
 
 # Reset Password
@@ -183,6 +233,8 @@ async def update_get(request : Request):
     return templates.TemplateResponse("new_pass.html",{"request": request})
 
 
+
+#  -----------------update password ---------------
 @app.post("/update_password", response_class=HTMLResponse)
 async def update_password(
     request: Request,
@@ -190,24 +242,66 @@ async def update_password(
     new_password: str = Form(...),
     confirm_password: str = Form(...)
 ):
+    # check confirm password
     if new_password != confirm_password:
-        return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Passwords do not match", "token": token})
+        return templates.TemplateResponse("new.html", {
+            "request": request,
+            "token": token,
+            "error": "Passwords do not match"
+        })
 
-    decoded = verify_access_token(token)
-    if not decoded:
-        return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Invalid or expired token", "token": token})
-
-    username = decoded["sub"]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=400, detail="Invalid token")
+    except JWTError:
+        return templates.TemplateResponse("new_pass.html", {
+            "request": request,
+            "error": "Invalid or expired reset token"
+        })
 
     admin = crud.get_admin_by_username(username)
-
     if not admin:
-        return templates.TemplateResponse("new_pass.html",{"request": request, "error": "No user found", "token": token})
-    
-    hashed = hash_password(new_password)
-    crud.update_user_password(admin.id, hashed)
+        return templates.TemplateResponse("new_pass.html", {
+            "request": request,
+            "error": "Admin not found"
+        })
 
-    return RedirectResponse(url="/", status_code=303)
+    hashed_password = pwd_context.hash(new_password)
+    crud.update_admin_password(admin.id, hashed_password)
+
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "msg": "Password updated successfully, please login again"
+    })
+
+
+# @app.post("/update_password", response_class=HTMLResponse)
+# async def update_password(
+#     request: Request,
+#     token: str = Form(...),
+#     new_password: str = Form(...),
+#     confirm_password: str = Form(...)
+# ):
+#     if new_password != confirm_password:
+#         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Passwords do not match", "token": token})
+
+#     decoded = verify_access_token(token)
+#     if not decoded:
+#         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Invalid or expired token", "token": token})
+
+#     username = decoded["sub"]
+
+#     admin = crud.get_admin_by_username(username)
+
+#     if not admin:
+#         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "No user found", "token": token})
+    
+#     hashed = hash_password(new_password)
+#     crud.update_user_password(admin.id, hashed)
+
+#     return RedirectResponse(url="/", status_code=303)
 
 
 # ------------------- Show Username -------------------
@@ -311,3 +405,17 @@ async def add_user(
 
     crud.add_user(name, age, gender, address)
     return RedirectResponse(url="/home", status_code=303)
+
+
+
+@app.post("/verify_otp", response_class=HTMLResponse)
+async def verify_otp(request: Request, username: str = Form(...), otp: str = Form(...)):
+    admin = crud.get_admin_by_username(username)
+    if not admin:
+        return templates.TemplateResponse("otp_page.html", {"request": request, "error": "User not found"})
+
+    if crud.verify_admin_otp(admin.id, otp):
+        reset_token = create_access_token({"sub": admin.username}, expires_delta=timedelta(minutes=2))
+        return RedirectResponse(url=f"/new?token={reset_token}", status_code=303)
+
+    return templates.TemplateResponse("otp_page.html", {"request": request, "error": "Invalid or expired OTP"})
