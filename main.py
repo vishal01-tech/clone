@@ -86,7 +86,6 @@ def get_current_user(request: Request):
 # ------------------- Auth Routes -------------------
 
 
-
 @app.get("/", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
