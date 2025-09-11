@@ -10,6 +10,7 @@ from passlib.context import CryptContext
 import random
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 # jwt config
@@ -32,16 +33,24 @@ def generate_otp():
 
 
 # ---------send email---------------
-def send_email(to_email: str, subject: str, body: str):
+def send_email(to_email: str, subject: str, body: str,otp : str):
     smtp_server = "smtp.gmail.com" #address of smtp server
     smtp_port = 587 # port 587 is used for sending email
     smtp_username = "shivardhana@gmail.com"  # replace with your Gmail
     smtp_password = "qobi zkop bxii onfg "     # use Gmail App Password
 
-    msg = MIMEText(body)  #Multipurpose Internet Mail Extensions object for the email body.The email content is passed into it.
+
+    # Render the HTML content from the template
+    html_body = templates.get_template("otp_email_template.html").render(otp=otp)
+
+    msg = MIMEMultipart(body)  #Multipurpose Internet Mail Extensions object for the email body.The email content is passed into it.
     msg["Subject"] = subject  #Sets the subject of the email.
     msg["From"] = smtp_username  #specify the sender email account
     msg["To"] = to_email # specify the recipient email account
+
+
+    # Attach the HTML body to the email
+    msg.attach(MIMEText(html_body, "html"))
 
     with smtplib.SMTP(smtp_server, smtp_port) as server: #establish a connection to smtp server with port
         server.starttls() # it ensure the data send is encrypt
@@ -88,6 +97,9 @@ def get_current_user(request: Request):
 
 @app.get("/", response_class=HTMLResponse)
 async def login_page(request: Request):
+    current_user = get_current_user(request)
+    if current_user:
+        return RedirectResponse(url="/home", status_code=303)
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -116,6 +128,7 @@ async def register_admin(request: Request,fullname: str = Form(...),username: st
 @app.post("/", response_class=HTMLResponse)
 async def login_admin(request: Request, username: str = Form(...), password: str = Form(...)):
     admin = crud.get_admin_by_username(username)
+    
     if not admin or not verify_password(password, admin.password):
         return templates.TemplateResponse("index.html", {"request": request, "error": "Invalid username or password"})
 
@@ -123,7 +136,7 @@ async def login_admin(request: Request, username: str = Form(...), password: str
     access_token = create_access_token(token_data)
 
     response = RedirectResponse(url="/home", status_code=303)
-    response.set_cookie(key="access_token",value=access_token,httponly=True,path="/",          secure=False      )
+    response.set_cookie(key="access_token",value=access_token,httponly=True,path="/",secure=False)
     return response
 
 
@@ -139,6 +152,10 @@ async def logout():
 # get
 @app.get("/forgot", response_class=HTMLResponse)
 async def forgot_password_page(request: Request):
+    current_user = get_current_user(request)
+    if current_user:
+        return RedirectResponse(url="/home", status_code=303)
+
     return templates.TemplateResponse("forgot_pass.html", {"request": request})
 
 
@@ -155,13 +172,17 @@ async def forgot_password(request: Request, identifier: str = Form(...)):
     crud.save_admin_otp(account.id, otp)
 
     # Send OTP via email
-    send_email(account.email, "Password Reset OTP", f"Your OTP code is: {otp}")
+    send_email(account.email, "Password Reset OTP", f"Your OTP code is:",otp)
     return templates.TemplateResponse("otp_page.html", {"request": request,"username": account.username,"identifier": identifier,"role": role})
 
 
 # Reset Password
 @app.get("/new", response_class=HTMLResponse)
 def show_reset_get(request: Request, token: str):
+    current_user = get_current_user(request)
+    if current_user:
+        return RedirectResponse(url="/home", status_code=303)
+    
     decoded = verify_access_token(token)
     if not decoded:
         return templates.TemplateResponse("new_pass.html",{"request": request, "error": "Invalid or expired token", "token": token})
@@ -185,6 +206,9 @@ async def update_password(
     new_password: str = Form(...),
     confirm_password: str = Form(...)
 ):
+    current_user = get_current_user(request)
+    if current_user:
+        return RedirectResponse(url="/home", status_code=303)
     # check confirm password
     if new_password != confirm_password:
         return templates.TemplateResponse("new.html", {"request": request,"token": token,"error": "Passwords do not match"})
@@ -304,6 +328,9 @@ async def add_user(
 # ------------verify otp-----------------
 @app.post("/verify_otp", response_class=HTMLResponse)
 async def verify_otp(request: Request, username: str = Form(...), otp: str = Form(...)):
+    current_user = get_current_user(request)
+    if current_user:
+        return RedirectResponse(url="/home", status_code=303)
     admin = crud.get_admin_by_username(username)
     if not admin:
         return templates.TemplateResponse("otp_page.html", {"request": request, "error": "User not found"})
